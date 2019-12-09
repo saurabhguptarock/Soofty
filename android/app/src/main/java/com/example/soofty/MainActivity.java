@@ -1,4 +1,4 @@
-package com.example.soofty;
+package com.saverl.soofty;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
