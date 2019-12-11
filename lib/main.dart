@@ -1,6 +1,8 @@
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:soofty/pages/home_page.dart';
 import 'package:soofty/services/firebase_service.dart';
+import 'package:soofty/shared/shared_code.dart';
 
 void main() => runApp(MyApp());
 
@@ -25,7 +27,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
-    demo();
+    initializeUser();
+    FirebaseAdMob.instance.initialize(appId: appId);
     super.initState();
   }
 
