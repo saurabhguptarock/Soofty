@@ -1,4 +1,3 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
@@ -8,17 +7,15 @@ import 'package:soofty/model/model.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 import 'package:soofty/shared/shared_code.dart';
 import 'package:path_provider/path_provider.dart';
-// import 'permiss';
-import 'package:connectivity/connectivity.dart' as csa;
 import 'package:permission_handler/permission_handler.dart';
 
 // import 'ro';
-class HomeScreenPage extends StatefulWidget {
+class HomePage extends StatefulWidget {
   @override
-  _HomeScreenPageState createState() => _HomeScreenPageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-class _HomeScreenPageState extends State<HomeScreenPage> {
+class _HomePageState extends State<HomePage> {
   static final MobileAdTargetingInfo mobileAdTargetingInfo =
       MobileAdTargetingInfo(
     keywords: ['camera', 'music', 'image', 'status', 'video', 'whatsapp'],
@@ -31,7 +28,6 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
   BannerAd _bannerAd;
   InterstitialAd _interstitialAd;
   bool _canShowAds = true;
-  AudioPlayer audioPlayer = AudioPlayer();
   List<MusicFiles> products = [];
 
   bool isLoading = false;
@@ -92,10 +88,10 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
   }
 
   play() async {
-    int result = await audioPlayer
-        .play('https://a.uguu.se/vsjcNclQhKbj_SoundHelix-Song-1.mp3');
-    if (result == 1) {
-    } else {}
+    // int result = await audioPlayer
+    //     .play('https://a.uguu.se/vsjcNclQhKbj_SoundHelix-Song-1.mp3');
+    // if (result == 1) {
+    // } else {}
   }
 
   String path;
@@ -114,10 +110,7 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
   }
 
   @override
-  void initState() async {
-    csa.ConnectivityResult status =
-        await csa.Connectivity().checkConnectivity();
-    // status.
+  void initState() {
     // _bannerAd = createBannerAd()
     //   ..load()
     //   ..show();
@@ -186,34 +179,19 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
       body: Container(
         color: Colors.white,
         height: MediaQuery.of(context).size.height - 134,
-        child: Center(
-          child: RaisedButton(
-            onPressed: () async {
-              // final taskId = await FlutterDownloader.enqueue(
-              //   url: 'https://a.uguu.se/vsjcNclQhKbj_SoundHelix-Song-1.mp3',
-              //   savedDir: path,
-              //   showNotification:
-              //       true, // show download progress in status bar (for Android)
-              //   openFileFromNotification:
-              //       true, // click on notification to open downloaded file (for Android)
-              // );
-            },
-            child: Text('$progress'),
-          ),
-        ),
-        // child: products != null
-        //     ? StaggeredGridView.countBuilder(
-        //         controller: _scrollController,
-        //         padding: EdgeInsets.all(8.0),
-        //         crossAxisCount: 4,
-        //         itemCount: products.length,
-        //         itemBuilder: (ctx, idx) => musicTile(idx),
-        //         staggeredTileBuilder: (i) =>
-        //             StaggeredTile.count(2, i.isEven ? 2 : 3),
-        //         mainAxisSpacing: 8,
-        //         crossAxisSpacing: 8,
-        //       )
-        //     : Center(child: CircularProgressIndicator()),
+        child: products != null
+            ? StaggeredGridView.countBuilder(
+                controller: _scrollController,
+                padding: EdgeInsets.all(8.0),
+                crossAxisCount: 4,
+                itemCount: products.length,
+                itemBuilder: (ctx, idx) => musicTile(idx),
+                staggeredTileBuilder: (i) =>
+                    StaggeredTile.count(2, i.isEven ? 2 : 3),
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+              )
+            : Center(child: CircularProgressIndicator()),
       ),
     );
   }
@@ -227,9 +205,12 @@ class _HomeScreenPageState extends State<HomeScreenPage> {
       ),
       child: InkWell(
         onTap: () {
-          audioPlayer.stop();
+          // audioPlayer.stop();
 
-          // _canShowAds ? showInterstitialAd() : loadInterstitialAd();
+          if (_canShowAds) {
+            showInterstitialAd();
+            loadInterstitialAd();
+          }
         },
         child: FadeInImage(
           placeholder: AssetImage('assets/images/wallfy.webp'),
