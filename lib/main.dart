@@ -1,21 +1,69 @@
+import 'dart:async';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_analytics/observer.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soofty/pages/home_page.dart';
 import 'package:soofty/pages/intro_page.dart';
-import 'package:soofty/services/firebase_service.dart';
+import 'package:soofty/pages/login_screen.dart';
 import 'package:soofty/shared/shared_code.dart';
+import 'model/model.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  Crashlytics.instance.enableInDevMode = true;
+  FlutterError.onError = Crashlytics.instance.recordFlutterError;
+  runZoned(() {
+    runApp(MyApp());
+  }, onError: Crashlytics.instance.recordError);
+}
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  FirebaseAnalytics analytics = FirebaseAnalytics();
+  bool isFirstTime = false;
+  @override
+  void initState() {
+    initialize();
+    FirebaseAdMob.instance.initialize(appId: appId);
+    super.initState();
+  }
+
+  initialize() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      bool firstTime = prefs.getBool("isFirstTime") ?? true;
+      setState(() {
+        isFirstTime = firstTime;
+      });
+    } catch (e) {}
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Soofty',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return MultiProvider(
+      providers: [
+        StreamProvider<FirebaseUser>.value(
+          value: FirebaseAuth.instance.onAuthStateChanged,
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Soofty',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: isFirstTime ? IntroPage() : MyHomePage(),
+        navigatorObservers: [
+          FirebaseAnalyticsObserver(analytics: analytics),
+        ],
       ),
-      home: MyHomePage(),
     );
   }
 }
@@ -27,14 +75,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
-  void initState() {
-    // initializeUser();
-    FirebaseAdMob.instance.initialize(appId: appId);
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return IntroPage();
+    FirebaseUser user = Provider.of<FirebaseUser>(context);
+    if (user != null)
+      return StreamProvider<User>.value(
+        initialData: User.fromMap({}),
+        child: HomePage(),
+      );
+    else
+      return LoginPage();
   }
 }

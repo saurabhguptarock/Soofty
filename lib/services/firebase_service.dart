@@ -48,14 +48,14 @@ Future<QuerySnapshot> streamMusicTile(
   if (isNext) {
     return _firestore
         .collection('musicTiles')
-        .orderBy('url')
+        .orderBy('uid')
         .startAfterDocument(lastDocument)
         .limit(10)
         .getDocuments();
   } else {
     return _firestore
         .collection('musicTiles')
-        .orderBy('url')
+        .orderBy('uid')
         .limit(10)
         .getDocuments();
   }

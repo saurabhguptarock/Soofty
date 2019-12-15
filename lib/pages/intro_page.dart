@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-// import 'package:intro_slider/intro_slider.dart';
 import 'package:intro_views_flutter/Models/page_view_model.dart';
 import 'package:intro_views_flutter/intro_views_flutter.dart';
-import 'home_page.dart';
+import 'package:soofty/pages/login_screen.dart';
 
 class IntroPage extends StatefulWidget {
   @override
@@ -93,7 +92,7 @@ class _IntroPageState extends State<IntroPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(),
+              builder: (context) => LoginPage(),
             ), //MaterialPageRoute
           );
         },
@@ -101,7 +100,7 @@ class _IntroPageState extends State<IntroPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => HomePage(),
+              builder: (context) => LoginPage(),
             ), //MaterialPageRoute
           );
         },

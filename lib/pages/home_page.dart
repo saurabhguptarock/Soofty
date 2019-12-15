@@ -1,15 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soofty/model/model.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 import 'package:soofty/shared/shared_code.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
-// import 'ro';
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -63,15 +63,18 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
-  void showInterstitialAd() async {
-    _interstitialAd..show();
-  }
-
   void loadInterstitialAd() {
     _interstitialAd = createInterstitialAd()..load();
   }
 
-  void showRewardAd() async {
+  void showInterstitialAd() {
+    if (_canShowAds) {
+      _interstitialAd..show();
+      loadInterstitialAd();
+    }
+  }
+
+  void showRewardAd() {
     RewardedVideoAd.instance.load(
       adUnitId: rewardedAdId,
       targetingInfo: mobileAdTargetingInfo,
@@ -87,41 +90,31 @@ class _HomePageState extends State<HomePage> {
     };
   }
 
-  play() async {
-    // int result = await audioPlayer
-    //     .play('https://a.uguu.se/vsjcNclQhKbj_SoundHelix-Song-1.mp3');
-    // if (result == 1) {
-    // } else {}
-  }
+  // play() async {
+  // int result = await audioPlayer
+  //     .play('https://a.uguu.se/vsjcNclQhKbj_SoundHelix-Song-1.mp3');
+  // if (result == 1) {
+  // } else {}
+  // }
 
-  String path;
-  int progress;
-  _localPath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    setState(() {
-      path = directory.path;
-    });
-  }
-
-  handlePermission() async {
-    Map<PermissionGroup, PermissionStatus> permissions =
-        await PermissionHandler().requestPermissions([PermissionGroup.storage]);
-    // await FlutterDownloader.initialize();
-  }
+  // String path;
+  // int progress;
+  // _localPath() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   setState(() {
+  //     path = directory.path;
+  //   });
+  // }
 
   @override
   void initState() {
+    initialize();
+    getProducts();
     // _bannerAd = createBannerAd()
     //   ..load()
     //   ..show();
-    // getProducts();
-    handlePermission();
-    _localPath();
-    // FlutterDownloader.registerCallback((a, b, c) {
-    //   progress = c;
-    //   // (double.parse((i / j).toStringAsFixed(2)) * 100).toInt();
-    // });
-    loadInterstitialAd();
+    // loadInterstitialAd();
+
     _scrollController.addListener(() {
       double maxScroll = _scrollController.position.maxScrollExtent;
       double currentScroll = _scrollController.position.pixels;
@@ -131,6 +124,11 @@ class _HomePageState extends State<HomePage> {
       }
     });
     super.initState();
+  }
+
+  initialize() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isFirstTime', false);
   }
 
   @override
@@ -178,20 +176,33 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(),
       body: Container(
         color: Colors.white,
+        width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height - 134,
-        child: products != null
-            ? StaggeredGridView.countBuilder(
-                controller: _scrollController,
-                padding: EdgeInsets.all(8.0),
-                crossAxisCount: 4,
-                itemCount: products.length,
-                itemBuilder: (ctx, idx) => musicTile(idx),
-                staggeredTileBuilder: (i) =>
-                    StaggeredTile.count(2, i.isEven ? 2 : 3),
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-              )
-            : Center(child: CircularProgressIndicator()),
+        child: products.length > 0
+            ? products != null
+                ? LiquidPullToRefresh(
+                    onRefresh: () async {},
+                    child: StaggeredGridView.countBuilder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.all(8.0),
+                      crossAxisCount: 4,
+                      itemCount: products.length,
+                      itemBuilder: (ctx, idx) => musicTile(idx),
+                      staggeredTileBuilder: (i) =>
+                          StaggeredTile.count(2, i.isEven ? 2 : 3),
+                      mainAxisSpacing: 8,
+                      crossAxisSpacing: 8,
+                    ),
+                  )
+                : Center(child: CircularProgressIndicator())
+            : Center(
+                child: Text(
+                  'No Data \n Try again later.',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.lato(
+                      fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+              ),
       ),
     );
   }
@@ -204,17 +215,13 @@ class _HomePageState extends State<HomePage> {
         Radius.circular(8.0),
       ),
       child: InkWell(
-        onTap: () {
-          // audioPlayer.stop();
-
-          if (_canShowAds) {
-            showInterstitialAd();
-            loadInterstitialAd();
-          }
-        },
-        child: FadeInImage(
-          placeholder: AssetImage('assets/images/wallfy.webp'),
-          image: NetworkImage(products[i].img),
+        onTap: () => showInterstitialAd(),
+        child: CachedNetworkImage(
+          imageUrl: products[i].img,
+          placeholder: (context, url) =>
+              Image.asset('assets/images/wallfy.webp'),
+          errorWidget: (context, url, error) =>
+              Image.asset('assets/images/wallfy.webp'),
         ),
       ),
     );
