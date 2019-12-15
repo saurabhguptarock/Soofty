@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:soofty/model/model.dart';
+import '../main.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [
   'email',
@@ -19,6 +20,7 @@ Future<void> login() async {
   );
   AuthResult result = await _auth.signInWithCredential(credential);
   createUserDatabase(result.user);
+  analytics.logLogin(loginMethod: 'Google SignIn');
 }
 
 Future<void> createUserDatabase(FirebaseUser user) async {
@@ -63,4 +65,5 @@ Future<QuerySnapshot> streamMusicTile(
 
 void signOut() {
   _auth.signOut();
+  analytics.logEvent(name: 'Logout');
 }

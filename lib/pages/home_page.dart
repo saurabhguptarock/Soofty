@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_admob/firebase_admob.dart';
@@ -7,8 +8,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soofty/model/model.dart';
+import 'package:soofty/pages/show_audio_page.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 import 'package:soofty/shared/shared_code.dart';
+import '../main.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -90,24 +93,9 @@ class _HomePageState extends State<HomePage> {
     };
   }
 
-  // play() async {
-  // int result = await audioPlayer
-  //     .play('https://a.uguu.se/vsjcNclQhKbj_SoundHelix-Song-1.mp3');
-  // if (result == 1) {
-  // } else {}
-  // }
-
-  // String path;
-  // int progress;
-  // _localPath() async {
-  //   final directory = await getApplicationDocumentsDirectory();
-  //   setState(() {
-  //     path = directory.path;
-  //   });
-  // }
-
   @override
   void initState() {
+    analytics.setCurrentScreen(screenName: 'Home Screen');
     initialize();
     getProducts();
     // _bannerAd = createBannerAd()
@@ -172,6 +160,11 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Drawer(
+        child: Column(
+          children: <Widget>[],
+        ),
+      ),
       backgroundColor: Colors.white,
       appBar: AppBar(),
       body: Container(
@@ -181,13 +174,16 @@ class _HomePageState extends State<HomePage> {
         child: products.length > 0
             ? products != null
                 ? LiquidPullToRefresh(
-                    onRefresh: () async {},
+                    showChildOpacityTransition: false,
+                    onRefresh: () async {
+                      getProducts();
+                    },
                     child: StaggeredGridView.countBuilder(
                       controller: _scrollController,
                       padding: EdgeInsets.all(8.0),
                       crossAxisCount: 4,
                       itemCount: products.length,
-                      itemBuilder: (ctx, idx) => musicTile(idx),
+                      itemBuilder: (ctx, idx) => musicTile(idx, products[idx]),
                       staggeredTileBuilder: (i) =>
                           StaggeredTile.count(2, i.isEven ? 2 : 3),
                       mainAxisSpacing: 8,
@@ -207,7 +203,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget musicTile(int i) {
+  Widget musicTile(int i, MusicFiles musicFiles) {
     return Material(
       color: Colors.white,
       elevation: 8.0,
@@ -215,7 +211,16 @@ class _HomePageState extends State<HomePage> {
         Radius.circular(8.0),
       ),
       child: InkWell(
-        onTap: () => showInterstitialAd(),
+        onTap: () {
+          // showInterstitialAd();
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (ctx) => ShowAudioPage(
+                musicFiles: musicFiles,
+              ),
+            ),
+          );
+        },
         child: CachedNetworkImage(
           imageUrl: products[i].img,
           placeholder: (context, url) =>

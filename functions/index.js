@@ -21,17 +21,19 @@ exports.onMusicUpload = functions.storage.object().onFinalize(async object => {
     expires: "03-17-2025"
   });
   const url = results[0];
+  console.log(fileName);
 
-  admin
-    .firestore()
-    .collection("musicTiles")
-    .add({
-      img: "",
-      name: fileName.split("/")[1].split(".")[0],
-      audioUrl: url,
-      uid: ""
-    })
-    .then(id => {
-      id.update({ uid: id.id });
-    });
+  if (fileName.split("/")[0] == "Music Files")
+    admin
+      .firestore()
+      .collection("musicTiles")
+      .add({
+        img: "",
+        name: fileName.split("/")[1].split(".")[0],
+        audioUrl: url,
+        uid: ""
+      })
+      .then(id => {
+        id.update({ uid: id.id });
+      });
 });

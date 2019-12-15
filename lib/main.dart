@@ -21,16 +21,18 @@ void main() {
   }, onError: Crashlytics.instance.recordError);
 }
 
+FirebaseAnalytics analytics = FirebaseAnalytics();
+
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  FirebaseAnalytics analytics = FirebaseAnalytics();
   bool isFirstTime = false;
   @override
   void initState() {
+    analytics.logAppOpen();
     initialize();
     FirebaseAdMob.instance.initialize(appId: appId);
     super.initState();
