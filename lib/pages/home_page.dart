@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -35,10 +37,13 @@ class _HomePageState extends State<HomePage> {
   List<MusicFiles> products = [];
   bool isLoading = false;
   bool hasMore = true;
+  bool isOffline = false;
   DocumentSnapshot lastDocument;
   ScrollController _scrollController = ScrollController();
   int _sortSelected = 0;
   PackageInfo _packageInfo;
+  ConnectivityResult _connectivityResult;
+  StreamSubscription _subscription;
 
   BannerAd createBannerAd() {
     return BannerAd(
@@ -102,6 +107,19 @@ class _HomePageState extends State<HomePage> {
     //   ..show();
     // loadInterstitialAd();
 
+    _subscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      if (result == ConnectivityResult.none)
+        setState(() {
+          isOffline = true;
+        });
+      else
+        setState(() {
+          isOffline = false;
+        });
+    });
+
     _scrollController.addListener(() {
       double maxScroll = _scrollController.position.maxScrollExtent;
       double currentScroll = _scrollController.position.pixels;
@@ -116,6 +134,12 @@ class _HomePageState extends State<HomePage> {
   initialize() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     PackageInfo pacInfo = await PackageInfo.fromPlatform();
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      setState(() {
+        isOffline = true;
+      });
+    }
     setState(() {
       _packageInfo = pacInfo;
     });
@@ -126,6 +150,7 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _bannerAd?.dispose();
     _scrollController?.dispose();
+    _subscription?.cancel();
     super.dispose();
   }
 
@@ -163,12 +188,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Stack(
-        children: <Widget>[
-          Positioned(
-            bottom: 60,
-            right: 0,
-            child: FloatingActionButton(
+      floatingActionButton: isOffline
+          ? FloatingActionButton(
               onPressed: () {
                 showModalBottomSheet(
                   context: context,
@@ -399,10 +420,262 @@ class _HomePageState extends State<HomePage> {
                 );
               },
               child: Icon(FontAwesomeIcons.slidersH),
+            )
+          : Stack(
+              children: <Widget>[
+                Positioned(
+                  bottom: 60,
+                  right: 0,
+                  child: FloatingActionButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (ctx) => Container(
+                          color: Color(0xff737373),
+                          height: 150,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                Padding(padding: EdgeInsets.only(top: 5)),
+                                Column(
+                                  children: <Widget>[
+                                    Row(
+                                      children: <Widget>[
+                                        Padding(
+                                            padding: EdgeInsets.only(left: 15)),
+                                        Icon(FontAwesomeIcons.slidersH),
+                                        Padding(
+                                            padding: EdgeInsets.only(left: 20)),
+                                        Text(
+                                          'Sort Videos By',
+                                          style: GoogleFonts.lato(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              textStyle: TextStyle(
+                                                  color: Colors.grey)),
+                                        )
+                                      ],
+                                    ),
+                                    Divider(),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: <Widget>[
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _sortSelected = 0;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Column(
+                                        children: <Widget>[
+                                          Card(
+                                            elevation: 5,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(50)),
+                                            child: CircleAvatar(
+                                              backgroundColor:
+                                                  _sortSelected == 0
+                                                      ? Colors.blue
+                                                      : Colors.white,
+                                              radius: 27,
+                                              child: Icon(
+                                                FontAwesomeIcons.random,
+                                                size: 30,
+                                                color: _sortSelected == 0
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.only(top: 4)),
+                                          Text(
+                                            'Random',
+                                            style: GoogleFonts.lato(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                textStyle: TextStyle(
+                                                  color: _sortSelected == 0
+                                                      ? Colors.blue
+                                                      : Colors.black,
+                                                )),
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 20)),
+                                        ],
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _sortSelected = 1;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Column(
+                                        children: <Widget>[
+                                          Card(
+                                            elevation: 5,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(50)),
+                                            child: CircleAvatar(
+                                              backgroundColor:
+                                                  _sortSelected == 1
+                                                      ? Colors.blue
+                                                      : Colors.white,
+                                              radius: 27,
+                                              child: Icon(
+                                                FontAwesomeIcons.fire,
+                                                size: 30,
+                                                color: _sortSelected == 1
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.only(top: 4)),
+                                          Text(
+                                            'Popular',
+                                            style: GoogleFonts.lato(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                textStyle: TextStyle(
+                                                  color: _sortSelected == 1
+                                                      ? Colors.blue
+                                                      : Colors.black,
+                                                )),
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 20)),
+                                        ],
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _sortSelected = 2;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Column(
+                                        children: <Widget>[
+                                          Card(
+                                            elevation: 5,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(50)),
+                                            child: CircleAvatar(
+                                              backgroundColor:
+                                                  _sortSelected == 2
+                                                      ? Colors.blue
+                                                      : Colors.white,
+                                              radius: 27,
+                                              child: Icon(
+                                                FontAwesomeIcons.calendarDay,
+                                                size: 30,
+                                                color: _sortSelected == 2
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.only(top: 4)),
+                                          Text(
+                                            'Latest',
+                                            style: GoogleFonts.lato(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                textStyle: TextStyle(
+                                                  color: _sortSelected == 2
+                                                      ? Colors.blue
+                                                      : Colors.black,
+                                                )),
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 20)),
+                                        ],
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _sortSelected = 3;
+                                        });
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: Column(
+                                        children: <Widget>[
+                                          Card(
+                                            elevation: 5,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(50)),
+                                            child: CircleAvatar(
+                                              backgroundColor:
+                                                  _sortSelected == 3
+                                                      ? Colors.blue
+                                                      : Colors.white,
+                                              radius: 27,
+                                              child: Icon(
+                                                FontAwesomeIcons.calendarAlt,
+                                                size: 30,
+                                                color: _sortSelected == 3
+                                                    ? Colors.white
+                                                    : Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                          Padding(
+                                              padding: EdgeInsets.only(top: 4)),
+                                          Text(
+                                            'Oldest',
+                                            style: GoogleFonts.lato(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                textStyle: TextStyle(
+                                                  color: _sortSelected == 3
+                                                      ? Colors.blue
+                                                      : Colors.black,
+                                                )),
+                                          ),
+                                          Padding(
+                                              padding:
+                                                  EdgeInsets.only(bottom: 20)),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    child: Icon(FontAwesomeIcons.slidersH),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
       drawer: Drawer(
         child: Column(
           children: <Widget>[
@@ -416,29 +689,34 @@ class _HomePageState extends State<HomePage> {
       body: Container(
         color: Colors.white,
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height - 134,
-        child: products != null
-            ? products.length > 0
-                ? StaggeredGridView.countBuilder(
-                    controller: _scrollController,
-                    padding: EdgeInsets.all(8.0),
-                    crossAxisCount: 4,
-                    itemCount: products.length,
-                    itemBuilder: (ctx, idx) => musicTile(idx, products[idx]),
-                    staggeredTileBuilder: (i) =>
-                        StaggeredTile.count(2, i.isEven ? 2 : 3),
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                  )
-                : Center(child: CircularProgressIndicator())
-            : Center(
-                child: Text(
-                  'No Data \n Try again later.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.lato(
-                      fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ),
+        height: isOffline
+            ? MediaQuery.of(context).size.height
+            : MediaQuery.of(context).size.height - 134,
+        child: isOffline
+            ? Container()
+            : products != null
+                ? products.length > 0
+                    ? StaggeredGridView.countBuilder(
+                        controller: _scrollController,
+                        padding: EdgeInsets.all(8.0),
+                        crossAxisCount: 4,
+                        itemCount: products.length,
+                        itemBuilder: (ctx, idx) =>
+                            musicTile(idx, products[idx]),
+                        staggeredTileBuilder: (i) =>
+                            StaggeredTile.count(2, i.isEven ? 2 : 3),
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                      )
+                    : Center(child: CircularProgressIndicator())
+                : Center(
+                    child: Text(
+                      'No Data \n Try again later.',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.lato(
+                          fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                  ),
       ),
     );
   }

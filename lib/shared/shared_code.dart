@@ -15,14 +15,14 @@ String interstitialAdId =
 
 Future<bool> handlePermission() async {
   await PermissionHandler()
-      .requestPermissions([PermissionGroup.camera, PermissionGroup.microphone]);
+      .requestPermissions([PermissionGroup.camera, PermissionGroup.storage]);
   PermissionStatus permissionStatus1 =
       await PermissionHandler().checkPermissionStatus(
     PermissionGroup.camera,
   );
   PermissionStatus permissionStatus2 =
       await PermissionHandler().checkPermissionStatus(
-    PermissionGroup.microphone,
+    PermissionGroup.storage,
   );
   if (permissionStatus1.value == 2 && permissionStatus2.value == 2)
     return Future.value(true);

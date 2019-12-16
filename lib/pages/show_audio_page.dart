@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:soofty/model/model.dart';
 import 'package:soofty/pages/song_edit_page.dart';
 import '../main.dart';
@@ -19,11 +20,11 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
   AudioPlayer audioPlayer = AudioPlayer();
   bool _isPlaying = true;
   bool _hideInitialy = true;
+  double rating = 0;
 
   @override
   void initState() {
     analytics.setCurrentScreen(screenName: 'Show Audio Page');
-    AudioPlayer.logEnabled = true;
     play(widget.musicFiles.audioUrl);
     super.initState();
   }
@@ -130,7 +131,7 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
               ),
             ),
             Positioned(
-              bottom: 170,
+              bottom: 120,
               left: MediaQuery.of(context).size.width / 2 - 50,
               child: SizedBox(
                 width: 100,
@@ -142,9 +143,11 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
                   color: Colors.blue,
                   onPressed: () {
                     Navigator.of(context).pop();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (ctx) => SongEditPage()),
-                    );
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (ctx) => SongEditPage(
+                        musicFiles: widget.musicFiles,
+                      ),
+                    ));
                   },
                   child: Text(
                     'Create',
@@ -154,6 +157,23 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
                   ),
                 ),
               ),
+            ),
+            Positioned(
+              right: 20,
+              top: MediaQuery.of(context).padding.top + 30,
+              child: SmoothStarRating(
+                  allowHalfRating: false,
+                  onRatingChanged: (v) {
+                    setState(() {
+                      rating = v;
+                    });
+                  },
+                  starCount: 5,
+                  rating: rating,
+                  size: 30.0,
+                  color: Colors.white,
+                  borderColor: Colors.white,
+                  spacing: 0.0),
             ),
             Positioned(
               top: MediaQuery.of(context).padding.top + 20,

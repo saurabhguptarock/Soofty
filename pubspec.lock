@@ -106,13 +106,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.7"
-  file_picker:
-    dependency: "direct main"
-    description:
-      name: file_picker
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.4.3+1"
   firebase_admob:
     dependency: "direct main"
     description:
@@ -463,13 +456,6 @@ packages:
     dependency: transitive
     description:
       name: shared_preferences_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.1"
-  shimmer:
-    dependency: "direct main"
-    description:
-      name: shimmer
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.1"

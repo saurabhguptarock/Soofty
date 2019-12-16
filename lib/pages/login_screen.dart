@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soofty/services/firebase_service.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -91,18 +92,14 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
                         )
-                      : CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              Theme.of(context).primaryColor ?? Colors.white),
-                          strokeWidth: 3,
-                        ),
+                      : SpinKitCircle(color: Colors.blue),
                   onPressed: () {
                     setState(() {
                       login();
                       buttonInProgress = true;
                     });
 
-                    Future.delayed(Duration(seconds: 5), () {
+                    Future.delayed(Duration(seconds: 7), () {
                       if (mounted)
                         setState(() {
                           buttonInProgress = false;
