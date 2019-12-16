@@ -22,6 +22,7 @@
 android/app/google-services.json
 android/key.properties
 android/app/keys/
+.flutter-plugins-dependencies
 
 # Flutter/Dart/Pub related
 **/doc/api/

@@ -14,18 +14,19 @@ dependencies:
   firebase_auth: ^0.15.1
   firebase_admob: ^0.9.0+9
   google_sign_in: ^4.0.7
-  cached_network_image: ^1.1.2
+  cached_network_image: ^2.0.0-rc
   provider: ^3.2.0
   flutter_staggered_grid_view: ^0.3.0
   audioplayers: ^0.13.5
   permission_handler: ^4.0.0
-  liquid_pull_to_refresh: ^1.1.1
   intro_views_flutter: ^2.8.0
   shared_preferences: ^0.5.4+8
   firebase_analytics: ^5.0.5
   firebase_crashlytics: ^0.1.2+2
   google_fonts: ^0.1.1
+  package_info: ^0.4.0+13
   # !-----------------! #
+  flare_flutter: ^1.8.2
   firebase_messaging: ^6.0.3
   firebase_dynamic_links: ^0.5.0+8
   share: ^0.6.2+1

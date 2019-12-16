@@ -52,13 +52,13 @@ Future<QuerySnapshot> streamMusicTile(
         .collection('musicTiles')
         .orderBy('uid')
         .startAfterDocument(lastDocument)
-        .limit(10)
+        .limit(20)
         .getDocuments();
   } else {
     return _firestore
         .collection('musicTiles')
         .orderBy('uid')
-        .limit(10)
+        .limit(20)
         .getDocuments();
   }
 }

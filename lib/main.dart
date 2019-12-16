@@ -12,6 +12,7 @@ import 'package:soofty/pages/intro_page.dart';
 import 'package:soofty/pages/login_screen.dart';
 import 'package:soofty/shared/shared_code.dart';
 import 'model/model.dart';
+import 'package:soofty/services/firebase_service.dart' as firebaseService;
 
 void main() {
   Crashlytics.instance.enableInDevMode = true;
@@ -81,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
     FirebaseUser user = Provider.of<FirebaseUser>(context);
     if (user != null)
       return StreamProvider<User>.value(
+        value: firebaseService.streamUser(user.uid),
         initialData: User.fromMap({}),
         child: HomePage(),
       );
