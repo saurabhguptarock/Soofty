@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -31,6 +32,7 @@ class _HomePageState extends State<HomePage> {
     ],
     childDirected: false,
   );
+  final Trace myTrace = FirebasePerformance.instance.newTrace("get_music_data");
   BannerAd _bannerAd;
   InterstitialAd _interstitialAd;
   bool _canShowAds = true;
@@ -42,7 +44,6 @@ class _HomePageState extends State<HomePage> {
   ScrollController _scrollController = ScrollController();
   int _sortSelected = 0;
   PackageInfo _packageInfo;
-  ConnectivityResult _connectivityResult;
   StreamSubscription _subscription;
 
   BannerAd createBannerAd() {
@@ -81,6 +82,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  // TODO: add things for rewarded add
   void showRewardAd() {
     RewardedVideoAd.instance.load(
       adUnitId: rewardedAdId,
@@ -102,10 +104,11 @@ class _HomePageState extends State<HomePage> {
     analytics.setCurrentScreen(screenName: 'Home Screen');
     initialize();
     getProducts();
+    // TODO: fix loading when started offline
     // _bannerAd = createBannerAd()
     //   ..load()
     //   ..show();
-    // loadInterstitialAd();
+    //   loadInterstitialAd();
 
     _subscription = Connectivity()
         .onConnectivityChanged
@@ -166,12 +169,13 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       isLoading = true;
     });
+    myTrace.start();
     if (lastDocument == null)
       querySnapshot =
           await firebaseService.streamMusicTile(lastDocument, false);
     else
       querySnapshot = await firebaseService.streamMusicTile(lastDocument, true);
-
+    myTrace.stop();
     if (querySnapshot.documents.length < 20) {
       hasMore = false;
     }
@@ -693,7 +697,32 @@ class _HomePageState extends State<HomePage> {
             ? MediaQuery.of(context).size.height
             : MediaQuery.of(context).size.height - 134,
         child: isOffline
-            ? Container()
+            ? Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: 100,
+                    ),
+                    Icon(
+                      Icons.signal_wifi_off,
+                      size: 200,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    Text(
+                      'No Internet Connection!',
+                      style: GoogleFonts.lato(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  ],
+                ),
+              )
             : products != null
                 ? products.length > 0
                     ? StaggeredGridView.countBuilder(
@@ -729,15 +758,20 @@ class _HomePageState extends State<HomePage> {
         Radius.circular(8.0),
       ),
       child: InkWell(
-        onTap: () {
-          // showInterstitialAd();
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (ctx) => ShowAudioPage(
-                musicFiles: musicFiles,
+        onTap: () async {
+          bool _bool = await handlePermission();
+          if (_bool) {
+            // showInterstitialAd();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) => ShowAudioPage(
+                  musicFiles: musicFiles,
+                ),
               ),
-            ),
-          );
+            );
+          } else {
+            showToast('Please Grant Permission');
+          }
         },
         child: CachedNetworkImage(
           fit: BoxFit.fill,

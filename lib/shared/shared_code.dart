@@ -1,4 +1,6 @@
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 String _bannerAdId;
@@ -12,6 +14,14 @@ String rewardedAdId =
     _rewardedAdId != null ? _rewardedAdId : RewardedVideoAd.testAdUnitId;
 String interstitialAdId =
     _interstitialAdId != null ? _interstitialAdId : InterstitialAd.testAdUnitId;
+
+class MyBehavior extends ScrollBehavior {
+  @override
+  Widget buildViewportChrome(
+      BuildContext context, Widget child, AxisDirection axisDirection) {
+    return child;
+  }
+}
 
 Future<bool> handlePermission() async {
   await PermissionHandler()
@@ -28,4 +38,14 @@ Future<bool> handlePermission() async {
     return Future.value(true);
   else
     return Future.value(false);
+}
+
+Future<void> showToast(String text) async {
+  const platform = MethodChannel('com.saverl.baron/awake');
+  try {
+    final ans = await platform.invokeMethod('showToast', {"text": text});
+    print('Succesfully shown a Toast ' + ans);
+  } on PlatformException catch (e) {
+    print('Some Error Occured' + e.message);
+  }
 }
