@@ -4,12 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'adunit_id.dart' as id;
 
-String bannerAdId = id.bannerAdId != null ? bannerAdId : BannerAd.testAdUnitId;
-String appId = appId != null ? appId : FirebaseAdMob.testAppId;
+String bannerAdId =
+    id.bannerAdId != null ? id.bannerAdId : BannerAd.testAdUnitId;
+String appId = id.appId != null ? id.appId : FirebaseAdMob.testAppId;
 String rewardedAdId =
-    rewardedAdId != null ? rewardedAdId : RewardedVideoAd.testAdUnitId;
-String interstitialAdId =
-    interstitialAdId != null ? interstitialAdId : InterstitialAd.testAdUnitId;
+    id.rewardedAdId != null ? id.rewardedAdId : RewardedVideoAd.testAdUnitId;
+String interstitialAdId = id.interstitialAdId != null
+    ? id.interstitialAdId
+    : InterstitialAd.testAdUnitId;
 
 class MyBehavior extends ScrollBehavior {
   @override
