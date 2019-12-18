@@ -24,6 +24,7 @@ android/key.properties
 android/app/keys/
 .flutter-plugins-dependencies
 assets/images/big_buck_bunny_720p_20mb.mp4
+lib/shared/adunit_id.dart
 
 # Flutter/Dart/Pub related
 **/doc/api/
