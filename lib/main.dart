@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
         theme: ThemeData(
           primarySwatch: Colors.red,
         ),
-        home: isFirstTime ? IntroPage() : MyHomePage(),
+        home: !isFirstTime ? IntroPage() : MyHomePage(),
         navigatorObservers: [
           FirebaseAnalyticsObserver(analytics: analytics),
         ],
