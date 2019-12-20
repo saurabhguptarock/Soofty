@@ -2,12 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:soofty/model/model.dart';
 import 'package:soofty/pages/home_page.dart';
 import '../main.dart';
 import 'package:esys_flutter_share/esys_flutter_share.dart';
+import 'package:soofty/services/firebase_service.dart' as firebaseService;
 
 class ExportPage extends StatefulWidget {
   final MusicFiles musicFiles;
@@ -40,7 +41,7 @@ class _ExportPageState extends State<ExportPage> {
     super.initState();
   }
 
-  void play()  {
+  void play() {
     File file = File(widget.fileName);
     setState(() {
       _file = file;
@@ -72,20 +73,32 @@ class _ExportPageState extends State<ExportPage> {
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<User>(context);
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Share.file('title', widget.musicFiles.name + '.m4a',
-                  _file.readAsBytesSync().buffer.asUint8List(), 'audio/mp4')
-              .then((v) {
-            if (_controller.value.isPlaying) pause();
-          });
-        },
-        child: Icon(FontAwesomeIcons.share),
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Positioned(
+            bottom: 60,
+            right: 0,
+            child: FloatingActionButton(
+              onPressed: () {
+                Share.file(
+                        'title',
+                        widget.musicFiles.name + '.mp4',
+                        _file.readAsBytesSync().buffer.asUint8List(),
+                        'video/mp4')
+                    .then((v) {
+                  if (_controller.value.isPlaying) pause();
+                });
+              },
+              child: Icon(FontAwesomeIcons.share),
+            ),
+          ),
+        ],
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height - 50,
+        height: MediaQuery.of(context).size.height - 100,
         child: Stack(
           children: <Widget>[
             GestureDetector(
@@ -195,13 +208,19 @@ class _ExportPageState extends State<ExportPage> {
                 child: GestureDetector(
                   onTap: () {
                     Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(builder: (ctx) => HomePage()));
+                      MaterialPageRoute(
+                        builder: (ctx) => StreamProvider<User>.value(
+                            value: firebaseService.streamUser(user.uid),
+                            initialData: User.fromMap({}),
+                            child: HomePage()),
+                      ),
+                    );
                   },
                   child: Container(
                     height: 30,
                     width: 110,
                     decoration: BoxDecoration(
-                        color: Colors.blue,
+                        color: Color(0xff7160FF),
                         borderRadius: BorderRadius.circular(50)),
                     child: Center(
                         child: Text(

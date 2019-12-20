@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dio/dio.dart';
@@ -63,7 +62,7 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
         borderRadius: 10.0,
         backgroundColor: Colors.white,
         progressWidget: SpinKitCubeGrid(
-          color: Colors.blue,
+          color: Color(0xff7160FF),
           size: 50,
         ),
         elevation: 10.0,
@@ -220,7 +219,7 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  color: Colors.blue,
+                  color: Color(0xff7160FF),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(MaterialPageRoute(

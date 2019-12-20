@@ -85,7 +85,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
                         )
-                      : SpinKitCircle(color: Colors.blue),
+                      : SpinKitCircle(
+                          color: Color(0xff7160FF),
+                        ),
                   onPressed: () {
                     setState(() {
                       login();
