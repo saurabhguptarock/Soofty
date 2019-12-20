@@ -6,9 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soofty/pages/home_page.dart';
-import 'package:soofty/pages/intro_page.dart';
 import 'package:soofty/pages/login_screen.dart';
 import 'package:soofty/shared/shared_code.dart';
 import 'model/model.dart';
@@ -30,21 +28,11 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool isFirstTime = true;
   @override
   void initState() {
     analytics.logAppOpen();
-    initialize();
     FirebaseAdMob.instance.initialize(appId: appId);
     super.initState();
-  }
-
-  initialize() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool firstTime = prefs.getBool("isFirstTime") ?? true;
-    setState(() {
-      isFirstTime = firstTime;
-    });
   }
 
   @override
@@ -58,9 +46,9 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'Soofty',
         theme: ThemeData(
-          primarySwatch: Colors.red,
+          primarySwatch: Colors.blue,
         ),
-        home: !isFirstTime ? IntroPage() : MyHomePage(),
+        home: MyHomePage(),
         navigatorObservers: [
           FirebaseAnalyticsObserver(analytics: analytics),
         ],
