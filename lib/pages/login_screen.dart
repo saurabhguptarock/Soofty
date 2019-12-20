@@ -11,21 +11,14 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   bool buttonInProgress = false;
+
   void initState() {
     initialize();
     super.initState();
   }
 
-  bool isFirstTime = false;
-
   initialize() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    try {
-      bool firstTime = prefs.getBool("isFirstTime") ?? true;
-      setState(() {
-        isFirstTime = firstTime;
-      });
-    } catch (e) {}
     prefs.setBool('isFirstTime', false);
   }
 

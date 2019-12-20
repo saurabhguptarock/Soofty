@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intro_views_flutter/Models/page_view_model.dart';
-import 'package:intro_views_flutter/intro_views_flutter.dart';
+import 'package:intro_slider/dot_animation_enum.dart';
+import 'package:intro_slider/intro_slider.dart';
+import 'package:intro_slider/slide_object.dart';
 import 'package:soofty/pages/login_screen.dart';
 import '../main.dart';
 
@@ -11,76 +12,67 @@ class IntroPage extends StatefulWidget {
 }
 
 class _IntroPageState extends State<IntroPage> {
-  final pages = [
-    PageViewModel(
-        pageColor: const Color(0xFF607D8B),
-        iconImageAssetPath: 'assets/images/taxi-driver.png.webp',
-        iconColor: null,
-        bubbleBackgroundColor: Colors.white,
-        body: Text(
-          'Easy  cab  booking  at  your  doorstep  with  cashless  payment  system',
+  List<Slide> slides = [
+    Slide(
+      backgroundColor: Color(0xff1C3D4E),
+      title: "EASY TO USE",
+      styleTitle: GoogleFonts.lato(
+        textStyle: TextStyle(
+          color: Color(0xff3da4ab),
+          fontSize: 30.0,
+          fontWeight: FontWeight.bold,
         ),
-        title: Text('Cabs'),
-        mainImage: Image.asset(
-          'assets/images/taxi.png.webp',
-          height: 285.0,
-          width: 285.0,
-          alignment: Alignment.center,
+      ),
+      description: "Turn your images into amazing videos within seconds.",
+      styleDescription: TextStyle(
+        color: Color(0xfffe9c8f),
+        fontSize: 20.0,
+        fontStyle: FontStyle.italic,
+      ),
+      pathImage: "assets/images/easy.webp",
+    ),
+    Slide(
+      title: "MANY MUSIC",
+      backgroundColor: Color.fromRGBO(89, 83, 134, 1),
+      styleTitle: GoogleFonts.lato(
+        textStyle: TextStyle(
+          color: Color(0xff3da4ab),
+          fontSize: 30.0,
+          fontWeight: FontWeight.bold,
         ),
-        titleTextStyle: GoogleFonts.lato(),
-        bodyTextStyle: GoogleFonts.lato()),
-    PageViewModel(
-        pageColor: const Color(0xFF607D8B),
-        iconImageAssetPath: 'assets/images/air-hostess.png.webp',
-        iconColor: null,
-        bubbleBackgroundColor: Colors.white,
-        body: Text(
-          'Easy  cab  booking  at  your  doorstep  with  cashless  payment  system',
+      ),
+      description: "Latest music to choose from",
+      styleDescription: GoogleFonts.lato(
+        textStyle: TextStyle(
+          color: Color(0xfffe9c8f),
+          fontSize: 20.0,
+          fontStyle: FontStyle.italic,
         ),
-        title: Text('Cabs'),
-        mainImage: Image.asset(
-          'assets/images/airplane.png.webp',
-          height: 285.0,
-          width: 285.0,
-          alignment: Alignment.center,
+      ),
+      pathImage: "assets/images/music.webp",
+    ),
+    Slide(
+      title: "FAST EXPORT",
+      backgroundColor: Color(0xff9730CB),
+      styleTitle: GoogleFonts.lato(
+        textStyle: TextStyle(
+          color: Color(0xff3da4ab),
+          fontSize: 30.0,
+          fontWeight: FontWeight.bold,
         ),
-        titleTextStyle: GoogleFonts.lato(),
-        bodyTextStyle: GoogleFonts.lato()),
-    PageViewModel(
-        pageColor: const Color(0xFF607D8B),
-        iconImageAssetPath: 'assets/images/bus-driver.png.webp',
-        iconColor: null,
-        bubbleBackgroundColor: Colors.white,
-        body: Text(
-          'Easy  cab  booking  at  your  doorstep  with  cashless  payment  system',
+      ),
+      description: "Preview and Export videos within seconds.",
+      styleDescription: GoogleFonts.lato(
+        textStyle: TextStyle(
+          color: Color(0xfffe9c8f),
+          fontSize: 20.0,
+          fontStyle: FontStyle.italic,
         ),
-        title: Text('Cabs'),
-        mainImage: Image.asset(
-          'assets/images/bus.png.webp',
-          height: 285.0,
-          width: 285.0,
-          alignment: Alignment.center,
-        ),
-        titleTextStyle: GoogleFonts.lato(),
-        bodyTextStyle: GoogleFonts.lato()),
-    PageViewModel(
-        pageColor: const Color(0xFF607D8B),
-        iconImageAssetPath: 'assets/images/waiter.png.webp',
-        iconColor: null,
-        bubbleBackgroundColor: Colors.white,
-        body: Text(
-          'Easy  cab  booking  at  your  doorstep  with  cashless  payment  system',
-        ),
-        title: Text('Cabs'),
-        mainImage: Image.asset(
-          'assets/images/hotel.png.webp',
-          height: 285.0,
-          width: 285.0,
-          alignment: Alignment.center,
-        ),
-        titleTextStyle: GoogleFonts.lato(),
-        bodyTextStyle: GoogleFonts.lato()),
+      ),
+      pathImage: "assets/images/fast.webp",
+    ),
   ];
+
   @override
   void initState() {
     analytics.setCurrentScreen(screenName: 'Intro Page');
@@ -90,30 +82,34 @@ class _IntroPageState extends State<IntroPage> {
   @override
   Widget build(BuildContext context) {
     return Builder(
-      builder: (ctx) => IntroViewsFlutter(
-        pages,
-        showNextButton: true,
-        showBackButton: true,
-        onTapSkipButton: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LoginPage(),
-            ), //MaterialPageRoute
-          );
-        },
-        onTapDoneButton: () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LoginPage(),
-            ), //MaterialPageRoute
-          );
-        },
-        pageButtonTextStyles: TextStyle(
-          color: Colors.white,
-          fontSize: 18.0,
+      builder: (ctx) => IntroSlider(
+        slides: slides,
+        renderSkipBtn: Icon(
+          Icons.skip_next,
+          color: Color(0xffffcc5c),
         ),
+        colorSkipBtn: Color(0x33ffcc5c),
+        highlightColorSkipBtn: Color(0xffffcc5c),
+        renderNextBtn: Icon(
+          Icons.navigate_next,
+          color: Color(0xffffcc5c),
+          size: 35.0,
+        ),
+        renderDoneBtn: Icon(
+          Icons.done,
+          color: Color(0xffffcc5c),
+        ),
+        onDonePress: () {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (ctx) => LoginPage()));
+        },
+        colorDoneBtn: Color(0x33ffcc5c),
+        highlightColorDoneBtn: Color(0xffffcc5c),
+        colorDot: Color(0xffffcc5c),
+        sizeDot: 13.0,
+        typeDotAnimation: dotSliderAnimation.SIZE_TRANSITION,
+        backgroundColorAllSlides: Colors.white,
+        shouldHideStatusBar: true,
       ),
     );
   }

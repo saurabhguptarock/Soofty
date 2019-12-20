@@ -1,17 +1,24 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:soofty/pages/export_page.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:soofty/shared/shared_code.dart';
+import 'package:soofty/uuid/uuid.dart';
 import '../main.dart';
 import 'package:soofty/model/model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
+
+import 'export_page.dart';
 
 class SongEditPage extends StatefulWidget {
   final MusicFiles musicFiles;
@@ -39,12 +46,14 @@ class _SongEditPageState extends State<SongEditPage> {
   List<File> _images = List(10);
   InterstitialAd _interstitialAd;
   bool _canShowAds = true;
+  final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
+  ProgressDialog pr;
 
   @override
   void initState() {
     analytics.setCurrentScreen(screenName: 'Song Edit Page');
-    play(widget.musicFiles.audioUrl);
-    loadInterstitialAd();
+    // play(widget.musicFiles.audioUrl);
+    // loadInterstitialAd();
     super.initState();
   }
 
@@ -53,6 +62,7 @@ class _SongEditPageState extends State<SongEditPage> {
     stop();
     audioPlayer?.dispose();
     _interstitialAd?.dispose();
+    _flutterFFmpeg?.cancel();
     super.dispose();
   }
 
@@ -120,6 +130,7 @@ class _SongEditPageState extends State<SongEditPage> {
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<User>(context);
     return Scaffold(
       body: Container(
         width: MediaQuery.of(context).size.width,
@@ -307,13 +318,123 @@ class _SongEditPageState extends State<SongEditPage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(50)),
                 child: GestureDetector(
-                  onTap: () {
-                    // showInterstitialAd();
-                    stop();
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (ctx) => ExportPage(
-                              musicFiles: widget.musicFiles,
-                            )));
+                  onTap: () async {
+                    pr = ProgressDialog(context,
+                        isDismissible: false,
+                        type: ProgressDialogType.Download);
+                    pr.style(
+                      message: 'Downloading...',
+                      borderRadius: 10.0,
+                      backgroundColor: Colors.white,
+                      progressWidget: SpinKitCubeGrid(
+                        color: Colors.blue,
+                        size: 50,
+                      ),
+                      elevation: 10.0,
+                      insetAnimCurve: Curves.easeInOut,
+                      progress: 0.0,
+                      maxProgress: 100.0,
+                      progressTextStyle: GoogleFonts.lato(
+                        textStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 13.0,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      messageTextStyle: GoogleFonts.lato(
+                        textStyle: TextStyle(
+                            color: Colors.black,
+                            fontSize: 19.0,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    );
+                    pr.show();
+                    var uuid = Uuid();
+                    Directory tempDir =
+                        await getApplicationDocumentsDirectory();
+                    String tempPath = tempDir.path;
+                    String fileContent = '';
+                    _images.forEach((f) {
+                      try {
+                        fileContent += 'file ' + '${f.path}\n';
+                      } catch (e) {}
+                    });
+                    File('$tempPath/Downloads/args.txt')
+                        .openWrite()
+                        .write(fileContent);
+                    String txt = await File('$tempPath/Downloads/args.txt')
+                        .readAsString();
+                    print(txt);
+
+                    _flutterFFmpeg
+                        .getMediaInformation(
+                            '$tempPath/Downloads/${widget.musicFiles.name}.m4a')
+                        .then((info) {
+                      print("Media Information");
+                      print("Path: ${info['path']}");
+                      print("Format: ${info['format']}");
+                      print("Duration: ${info['duration']}");
+                      print("Start time: ${info['startTime']}");
+                      print("Bitrate: ${info['bitrate']}");
+                    });
+                    double frameRate = _noOfImages / 30;
+                    String uniqueId = uuid.v1();
+                    int ans1 = await _flutterFFmpeg.executeWithArguments([
+                      '-r',
+                      '$frameRate',
+                      '-f',
+                      'image2',
+                      '-f',
+                      'concat',
+                      '-safe',
+                      '0',
+                      '-i',
+                      '$tempPath/Downloads/args.txt',
+                      '-vcodec',
+                      'mpeg4',
+                      '-s',
+                      '720x1280',
+                      '-q',
+                      '5',
+                      '-pix_fmt',
+                      'yuv420p',
+                      '$tempPath/Downloads/${user.uid}_${uniqueId}_1.mp4'
+                    ]);
+                    int ans2 = await _flutterFFmpeg.executeWithArguments([
+                      '-i',
+                      '$tempPath/Downloads/${user.uid}_${uniqueId}_1.mp4',
+                      '-i',
+                      '$tempPath/Downloads/${widget.musicFiles.name}.m4a',
+                      '-c',
+                      'copy',
+                      '-map',
+                      '0:v:0',
+                      '-map',
+                      '1:a:0',
+                      '$tempPath/Downloads/${user.uid}_${uniqueId}_2.mp4'
+                    ]);
+                    if (ans1 == 0 && ans2 == 0) {
+                      // showInterstitialAd();
+                      // stop();
+                      pr.dismiss();
+                      Share.file(
+                          'title',
+                          widget.musicFiles.name + '.mp4',
+                          File('$tempPath/Downloads/${user.uid}_${uniqueId}_2.mp4')
+                              .readAsBytesSync()
+                              .buffer
+                              .asUint8List(),
+                          'video/mp4');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (ctx) => ExportPage(
+                            musicFiles: widget.musicFiles,
+                            fileName:
+                                '$tempPath/Downloads/${user.uid}_${uniqueId}_2.mp4',
+                          ),
+                        ),
+                      );
+                    }
+                    pr.dismiss();
                   },
                   child: Container(
                     height: 30,

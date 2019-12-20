@@ -15,7 +15,7 @@ import 'model/model.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 
 void main() {
-  Crashlytics.instance.enableInDevMode = true;
+  Crashlytics.instance.enableInDevMode = false;
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
   runZoned(() {
     runApp(MyApp());
@@ -30,7 +30,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  bool isFirstTime = false;
+  bool isFirstTime = true;
   @override
   void initState() {
     analytics.logAppOpen();
@@ -41,12 +41,10 @@ class _MyAppState extends State<MyApp> {
 
   initialize() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    try {
-      bool firstTime = prefs.getBool("isFirstTime") ?? true;
-      setState(() {
-        isFirstTime = firstTime;
-      });
-    } catch (e) {}
+    bool firstTime = prefs.getBool("isFirstTime") ?? true;
+    setState(() {
+      isFirstTime = firstTime;
+    });
   }
 
   @override
@@ -60,9 +58,9 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         title: 'Soofty',
         theme: ThemeData(
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.red,
         ),
-        home: isFirstTime ? IntroPage() : MyHomePage(),
+        home: !isFirstTime ? IntroPage() : MyHomePage(),
         navigatorObservers: [
           FirebaseAnalyticsObserver(analytics: analytics),
         ],

@@ -10,11 +10,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 import 'package:soofty/model/model.dart';
-import 'package:soofty/pages/home_page.dart';
 import 'package:soofty/pages/song_edit_page.dart';
-import 'package:soofty/shared/shared_code.dart';
+import 'package:soofty/services/firebase_service.dart' as firebaseService;
 import '../main.dart';
 
 class ShowAudioPage extends StatefulWidget {
@@ -142,6 +142,7 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<User>(context);
     return Scaffold(
       body: Container(
         height: MediaQuery.of(context).size.height,
@@ -223,8 +224,12 @@ class _ShowAudioPageState extends State<ShowAudioPage> {
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (ctx) => SongEditPage(
-                        musicFiles: widget.musicFiles,
+                      builder: (ctx) => StreamProvider<User>.value(
+                        value: firebaseService.streamUser(user.uid),
+                        initialData: User.fromMap({}),
+                        child: SongEditPage(
+                          musicFiles: widget.musicFiles,
+                        ),
                       ),
                     ));
                   },
