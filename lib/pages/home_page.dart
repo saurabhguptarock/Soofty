@@ -10,6 +10,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:package_info/package_info.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:soofty/model/model.dart';
 import 'package:soofty/pages/show_audio_page.dart';
@@ -191,6 +192,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    User user = Provider.of<User>(context);
     return Scaffold(
       floatingActionButton: isOffline
           ? FloatingActionButton(
@@ -731,7 +733,7 @@ class _HomePageState extends State<HomePage> {
                         crossAxisCount: 4,
                         itemCount: products.length,
                         itemBuilder: (ctx, idx) =>
-                            musicTile(idx, products[idx]),
+                            musicTile(idx, products[idx], user),
                         staggeredTileBuilder: (i) =>
                             StaggeredTile.count(2, i.isEven ? 2 : 3),
                         mainAxisSpacing: 8,
@@ -750,7 +752,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget musicTile(int i, MusicFiles musicFiles) {
+  Widget musicTile(int i, MusicFiles musicFiles, User user) {
     return Material(
       color: Colors.white,
       elevation: 8.0,
@@ -764,8 +766,12 @@ class _HomePageState extends State<HomePage> {
             // showInterstitialAd();
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (ctx) => ShowAudioPage(
-                  musicFiles: musicFiles,
+                builder: (ctx) => StreamProvider<User>.value(
+                  value: firebaseService.streamUser(user.uid),
+                  initialData: User.fromMap({}),
+                  child: ShowAudioPage(
+                    musicFiles: musicFiles,
+                  ),
                 ),
               ),
             );

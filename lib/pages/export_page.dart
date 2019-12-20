@@ -1,8 +1,5 @@
 import 'dart:io';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
@@ -14,8 +11,8 @@ import 'package:esys_flutter_share/esys_flutter_share.dart';
 
 class ExportPage extends StatefulWidget {
   final MusicFiles musicFiles;
-
-  const ExportPage({Key key, this.musicFiles}) : super(key: key);
+  final String fileName;
+  const ExportPage({Key key, this.musicFiles, this.fileName}) : super(key: key);
 
   @override
   _ExportPageState createState() => _ExportPageState();
@@ -31,8 +28,7 @@ class _ExportPageState extends State<ExportPage> {
   @override
   void initState() {
     analytics.setCurrentScreen(screenName: 'Export Page');
-    _controller = VideoPlayerController.asset(
-        'assets/images/big_buck_bunny_720p_20mb.mp4')
+    _controller = VideoPlayerController.file(File(widget.fileName))
       ..initialize()
       ..setLooping(true)
       ..play().then((t) {
@@ -44,10 +40,8 @@ class _ExportPageState extends State<ExportPage> {
     super.initState();
   }
 
-  void play() async {
-    Directory tempDir = await getApplicationDocumentsDirectory();
-    String tempPath = tempDir.path;
-    File file = File('$tempPath/Downloads/${widget.musicFiles.name}.m4a');
+  void play()  {
+    File file = File(widget.fileName);
     setState(() {
       _file = file;
     });
