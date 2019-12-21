@@ -388,59 +388,71 @@ class _SongEditPageState extends State<SongEditPage> {
                       });
                       double frameRate = _noOfImages / 30;
                       String uniqueId = uuid.v1();
-                      int ans1 = await _flutterFFmpeg.executeWithArguments([
-                        '-r',
-                        '$frameRate',
-                        '-f',
-                        'image2',
-                        '-f',
-                        'concat',
-                        '-safe',
-                        '0',
-                        '-i',
-                        '$tempPath/Downloads/args.txt',
-                        '-vcodec',
-                        'mpeg4',
-                        '-s',
-                        '720x1280',
-                        '-q',
-                        '5',
-                        '-pix_fmt',
-                        'yuv420p',
-                        '$tempPath/Downloads/${user.uid}_${uniqueId}_1.mp4'
-                      ]);
-                      int ans2 = await _flutterFFmpeg.executeWithArguments([
-                        '-i',
-                        '$tempPath/Downloads/${user.uid}_${uniqueId}_1.mp4',
-                        '-i',
-                        '$tempPath/Downloads/${widget.musicFiles.name}.m4a',
-                        '-c',
-                        'copy',
-                        '-map',
-                        '0:v:0',
-                        '-map',
-                        '1:a:0',
-                        '$tempPath/Downloads/${user.uid}_${uniqueId}_2.mp4'
-                      ]);
-                      if (ans1 == 0 && ans2 == 0) {
-                        showInterstitialAd();
-                        stop();
-                        pr.dismiss();
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (ctx) => StreamProvider<User>.value(
-                              value: firebaseService.streamUser(user.uid),
-                              initialData: User.fromMap({}),
-                              child: ExportPage(
-                                musicFiles: widget.musicFiles,
-                                fileName:
-                                    '$tempPath/Downloads/${user.uid}_${uniqueId}_2.mp4',
+                      try {
+                        if (!(await Directory('$tempPath/Export').exists())) {
+                          Directory directory =
+                              await Directory('$tempPath/Export')
+                                  .create(recursive: true);
+                          print(directory.path);
+                        } else {
+                          print(Directory('$tempPath/Export').path);
+                        }
+                        int ans1 = await _flutterFFmpeg.executeWithArguments([
+                          '-r',
+                          '$frameRate',
+                          '-f',
+                          'image2',
+                          '-f',
+                          'concat',
+                          '-safe',
+                          '0',
+                          '-i',
+                          '$tempPath/Downloads/args.txt',
+                          '-vcodec',
+                          'mpeg4',
+                          '-s',
+                          '720x1280',
+                          '-q',
+                          '5',
+                          '-pix_fmt',
+                          'yuv420p',
+                          '$tempPath/Export/${user.uid}_${uniqueId}_1.mp4'
+                        ]);
+                        int ans2 = await _flutterFFmpeg.executeWithArguments([
+                          '-i',
+                          '$tempPath/Export/${user.uid}_${uniqueId}_1.mp4',
+                          '-i',
+                          '$tempPath/Downloads/${widget.musicFiles.name}.m4a',
+                          '-c',
+                          'copy',
+                          '-map',
+                          '0:v:0',
+                          '-map',
+                          '1:a:0',
+                          '$tempPath/Export/${user.uid}_${uniqueId}_2.mp4'
+                        ]);
+                        if (ans1 == 0 && ans2 == 0) {
+                          showInterstitialAd();
+                          stop();
+                          pr.dismiss();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (ctx) => StreamProvider<User>.value(
+                                value: firebaseService.streamUser(user.uid),
+                                initialData: User.fromMap({}),
+                                child: ExportPage(
+                                  musicFiles: widget.musicFiles,
+                                  fileName:
+                                      '$tempPath/Export/${user.uid}_${uniqueId}_2.mp4',
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      } else {
-                        showToast('Some Error Occured');
+                          );
+                        } else {
+                          showToast('Some Error Occured');
+                        }
+                      } catch (e) {
+                        showToast(e.toString());
                       }
                       pr.dismiss();
                     } else {

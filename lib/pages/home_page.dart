@@ -111,12 +111,12 @@ class _HomePageState extends State<HomePage> {
     analytics.setCurrentScreen(screenName: 'Home Screen');
     initialize();
     getProducts();
-    // TODO: fix loading when started offline
-    print('object');
-    _bannerAd = createBannerAd()
-      ..load()
-      ..show();
-    loadInterstitialAd();
+    if (!isOffline) {
+      _bannerAd = createBannerAd()
+        ..load()
+        ..show();
+      loadInterstitialAd();
+    }
     _scrollController.addListener(() {
       double maxScroll = _scrollController.position.maxScrollExtent;
       double currentScroll = _scrollController.position.pixels;
@@ -128,6 +128,10 @@ class _HomePageState extends State<HomePage> {
     _subscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
+      _bannerAd = createBannerAd()
+        ..load()
+        ..show();
+      loadInterstitialAd();
       if (result == ConnectivityResult.none)
         setState(() {
           isOffline = true;
@@ -457,17 +461,43 @@ class _HomePageState extends State<HomePage> {
       drawer: Drawer(
         child: Column(
           children: <Widget>[
-            Container(
-              height: 200,
-              decoration: BoxDecoration(
-                  color: Color(0xff7160FF),
-                  image: DecorationImage(
-                      image: AssetImage('assets/images/wallfy.webp'))),
+            Stack(
+              children: <Widget>[
+                Container(
+                  height: 200,
+                  decoration: BoxDecoration(
+                      color: Color(0xff7160FF),
+                      image: DecorationImage(
+                          image: AssetImage('assets/images/wallfy.webp'),
+                          fit: BoxFit.fill)),
+                ),
+                if (_packageInfo != null)
+                  Positioned(
+                    bottom: 5,
+                    left: 5,
+                    child: Text(
+                      'Version : ${_packageInfo.version.substring(0, 3)}',
+                      style: GoogleFonts.lato(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+              ],
             ),
-            drawerTile(FontAwesomeIcons.video, 'My Videos', () {
-              Navigator.of(context).pop();
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (ctx) => MyVideoPage()));
+            drawerTile(FontAwesomeIcons.video, 'My Videos', () async {
+              bool _bool = await handlePermission();
+              if (_bool) {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (ctx) => StreamProvider<User>.value(
+                        value: firebaseService.streamUser(user.uid),
+                        initialData: User.fromMap({}),
+                        child: MyVideoPage()),
+                  ),
+                );
+              } else {
+                showToast('Please Grant Permission');
+              }
             }),
             drawerTile(FontAwesomeIcons.shareAlt, 'Invite People', () async {
               if (!isOffline) {
@@ -516,19 +546,9 @@ class _HomePageState extends State<HomePage> {
                 showToast('Could not launch $url');
               }
             }),
-            Padding(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height - 500)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                if (_packageInfo != null)
-                  Text(
-                    'Version : ${_packageInfo.version.substring(0, 3)}',
-                    style: GoogleFonts.lato(),
-                  ),
-              ],
-            )
+            drawerTile(FontAwesomeIcons.signOutAlt, 'Sign Out', () {
+              firebaseService.signOut();
+            }),
           ],
         ),
       ),

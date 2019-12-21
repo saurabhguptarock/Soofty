@@ -1,43 +1,31 @@
 import 'dart:io';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
-import 'package:soofty/pages/myvideo_page.dart';
 import 'package:video_player/video_player.dart';
-import 'package:soofty/model/model.dart';
-import 'package:soofty/pages/home_page.dart';
 import '../main.dart';
-import 'package:esys_flutter_share/esys_flutter_share.dart';
-import 'package:soofty/services/firebase_service.dart' as firebaseService;
 
-class ExportPage extends StatefulWidget {
-  final MusicFiles musicFiles;
-  final String fileName;
-  const ExportPage({Key key, this.musicFiles, this.fileName}) : super(key: key);
+class ShowVideoPage extends StatefulWidget {
+  final File file;
+  final String thumbPath;
+  final String name;
 
+  const ShowVideoPage({Key key, this.file, this.thumbPath, this.name})
+      : super(key: key);
   @override
-  _ExportPageState createState() => _ExportPageState();
+  _ShowVideoPageState createState() => _ShowVideoPageState();
 }
 
-class _ExportPageState extends State<ExportPage> {
+class _ShowVideoPageState extends State<ShowVideoPage> {
   bool _isPlaying = true;
   bool _hideInitialy = true;
-  File _file;
   VideoPlayerController _controller;
   bool _shouldPlay = false;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  var initializationSettingsAndroid =
-      AndroidInitializationSettings('@mipmap/ic_launcher');
-  var initializationSettingsIOS = IOSInitializationSettings();
-  User _user;
-
   @override
   void initState() {
-    analytics.setCurrentScreen(screenName: 'Export Page');
-    _controller = VideoPlayerController.file(File(widget.fileName))
+    analytics.setCurrentScreen(screenName: 'Show Video Page');
+    _controller = VideoPlayerController.file(widget.file)
       ..initialize()
       ..setLooping(true)
       ..play().then((t) {
@@ -45,51 +33,7 @@ class _ExportPageState extends State<ExportPage> {
           _shouldPlay = true;
         });
       });
-    play();
-    initialize();
-    var initializationSettings = InitializationSettings(
-        initializationSettingsAndroid, initializationSettingsIOS);
-    flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
     super.initState();
-  }
-
-  Future onSelectNotification(String payload) async {
-    if (payload != null) {
-      debugPrint('notification payload: ' + payload);
-    }
-    await Navigator.push(
-      context,
-      new MaterialPageRoute(
-        builder: (context) => StreamProvider<User>.value(
-          value: firebaseService.streamUser(_user.uid),
-          initialData: User.fromMap({}),
-          child: MyVideoPage(),
-        ),
-      ),
-    );
-  }
-
-  void initialize() async {
-    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'com.saverl.soofty', 'Soofty', 'WhatsApp Video Status Maker',
-        importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
-    var iOSPlatformChannelSpecifics = IOSNotificationDetails();
-    var platformChannelSpecifics = NotificationDetails(
-        androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(0, 'Export Complete',
-        '${widget.musicFiles.name}', platformChannelSpecifics,
-        payload: 'item x');
-  }
-
-  void play() {
-    File file = File(widget.fileName);
-    setState(() {
-      _file = file;
-    });
-    try {} catch (e) {
-      print(e);
-    }
   }
 
   void pause() async {
@@ -114,8 +58,6 @@ class _ExportPageState extends State<ExportPage> {
 
   @override
   Widget build(BuildContext context) {
-    User user = Provider.of<User>(context);
-    _user = user;
     return Scaffold(
       floatingActionButton: Stack(
         children: <Widget>[
@@ -126,8 +68,8 @@ class _ExportPageState extends State<ExportPage> {
               onPressed: () {
                 Share.file(
                         'title',
-                        widget.musicFiles.name + '.mp4',
-                        _file.readAsBytesSync().buffer.asUint8List(),
+                        widget.name + '.mp4',
+                        widget.file.readAsBytesSync().buffer.asUint8List(),
                         'video/mp4')
                     .then((v) {
                   if (_controller.value.isPlaying) pause();
@@ -240,40 +182,6 @@ class _ExportPageState extends State<ExportPage> {
                 ),
               ),
             ),
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 20,
-              right: 10,
-              child: Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50)),
-                child: GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (ctx) => StreamProvider<User>.value(
-                            value: firebaseService.streamUser(user.uid),
-                            initialData: User.fromMap({}),
-                            child: HomePage()),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    height: 30,
-                    width: 110,
-                    decoration: BoxDecoration(
-                        color: Color(0xff7160FF),
-                        borderRadius: BorderRadius.circular(50)),
-                    child: Center(
-                        child: Text(
-                      'Back To Home',
-                      style: GoogleFonts.lato(
-                          textStyle: TextStyle(color: Colors.white)),
-                    )),
-                  ),
-                ),
-              ),
-            )
           ],
         ),
       ),

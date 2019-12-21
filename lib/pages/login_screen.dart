@@ -50,19 +50,24 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ),
-          Text('tag line'),
+          Padding(padding: EdgeInsets.only(top: 30)),
+          Text(
+            ' WhatsApp Video Status Maker',
+            style: GoogleFonts.lato(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          Padding(padding: EdgeInsets.only(top: 50)),
           SizedBox(
             height: 55,
             width: MediaQuery.of(context).size.width * .8,
             child: Card(
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5)),
+                  borderRadius: BorderRadius.circular(10)),
               elevation: 3,
               color: Colors.white,
               child: SizedBox.expand(
                 child: RaisedButton(
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5)),
+                      borderRadius: BorderRadius.circular(10)),
                   color: Colors.white,
                   child: !buttonInProgress
                       ? Row(
