@@ -58,7 +58,7 @@ class _ExportPageState extends State<ExportPage> {
     if (payload != null) {
       debugPrint('notification payload: ' + payload);
     }
-    await Navigator.push(
+    Navigator.push(
       context,
       new MaterialPageRoute(
         builder: (context) => StreamProvider<User>.value(
@@ -79,7 +79,7 @@ class _ExportPageState extends State<ExportPage> {
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
     await flutterLocalNotificationsPlugin.show(0, 'Export Complete',
         '${widget.musicFiles.name}', platformChannelSpecifics,
-        payload: 'item x');
+        payload: '${widget.musicFiles.name}');
   }
 
   void play() {

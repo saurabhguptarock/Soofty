@@ -1,5 +1,5 @@
 import 'dart:io';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -124,15 +124,39 @@ class _MyVideoPageState extends State<MyVideoPage> {
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child: StaggeredGridView.countBuilder(
-          padding: EdgeInsets.all(8.0),
-          crossAxisCount: 4,
-          itemCount: _files.length,
-          itemBuilder: (ctx, idx) => musicTile(idx, _files[idx]),
-          staggeredTileBuilder: (i) => StaggeredTile.count(2, i.isEven ? 2 : 3),
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
-        ),
+        child: _files.length > 0
+            ? StaggeredGridView.countBuilder(
+                padding: EdgeInsets.all(8.0),
+                crossAxisCount: 4,
+                itemCount: _files.length,
+                itemBuilder: (ctx, idx) => musicTile(idx, _files[idx]),
+                staggeredTileBuilder: (i) =>
+                    StaggeredTile.count(2, i.isEven ? 2 : 3),
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+              )
+            : Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 100,
+                  ),
+                  Icon(
+                    FontAwesomeIcons.solidFolderOpen,
+                    size: 200,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(
+                    height: 50,
+                  ),
+                  Text(
+                    'No Videos Exported!',
+                    style: GoogleFonts.lato(
+                      fontSize: 25,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                ],
+              ),
       ),
     );
   }

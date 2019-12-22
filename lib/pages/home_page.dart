@@ -152,8 +152,8 @@ class _HomePageState extends State<HomePage> {
       Navigator.of(context)
           .pushReplacement(MaterialPageRoute(builder: (ctx) => MyHomePage()));
     });
+    _messaging.subscribeToTopic('newuser');
     super.initState();
-    _messaging.subscribeToTopic('collectibles');
   }
 
   initialize() async {

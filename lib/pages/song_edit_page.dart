@@ -1,5 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ import 'package:soofty/model/model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:flutter_ffmpeg/flutter_ffmpeg.dart';
-
+import 'dart:async';
 import 'export_page.dart';
 
 class SongEditPage extends StatefulWidget {
@@ -319,7 +320,10 @@ class _SongEditPageState extends State<SongEditPage> {
                     borderRadius: BorderRadius.circular(50)),
                 child: GestureDetector(
                   onTap: () async {
+                    bool isTakingTooLong = true;
                     bool canShow = false;
+                    final Trace metric =
+                        FirebasePerformance.instance.newTrace('export_started');
                     for (var i = 0; i < _images.length; i++) {
                       try {
                         if (_images[i] != null) {
@@ -358,6 +362,15 @@ class _SongEditPageState extends State<SongEditPage> {
                         ),
                       );
                       pr.show();
+                      await metric.start();
+                      Future.delayed(Duration(seconds: 10), () {
+                        if (isTakingTooLong) {
+                          pr.dismiss();
+                          showToast(
+                              'Some Error Occured, Please Restart The App!');
+                          metric.stop();
+                        }
+                      });
                       var uuid = Uuid();
                       Directory tempDir =
                           await getApplicationDocumentsDirectory();
@@ -432,9 +445,14 @@ class _SongEditPageState extends State<SongEditPage> {
                           '$tempPath/Export/${user.uid}_${uniqueId}_2.mp4'
                         ]);
                         if (ans1 == 0 && ans2 == 0) {
+                          await metric.stop();
                           showInterstitialAd();
                           stop();
                           pr.dismiss();
+                          if (mounted)
+                            setState(() {
+                              isTakingTooLong = false;
+                            });
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (ctx) => StreamProvider<User>.value(
@@ -449,12 +467,15 @@ class _SongEditPageState extends State<SongEditPage> {
                             ),
                           );
                         } else {
+                          await metric.stop();
                           showToast('Some Error Occured');
                         }
                       } catch (e) {
+                        await metric.stop();
                         showToast(e.toString());
                       }
                       pr.dismiss();
+                      await metric.stop();
                     } else {
                       showToast('Please Select Atleast One Image.');
                     }
