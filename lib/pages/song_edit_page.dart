@@ -367,7 +367,7 @@ class _SongEditPageState extends State<SongEditPage> {
                         if (isTakingTooLong) {
                           pr.dismiss();
                           showToast(
-                              'Some Error Occured, Please Restart The App!');
+                              'Some Error Occured, Please Try Again');
                           metric.stop();
                         }
                       });
