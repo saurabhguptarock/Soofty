@@ -143,14 +143,19 @@ class _HomePageState extends State<HomePage> {
     });
 
     _messaging.configure(onMessage: (Map<String, dynamic> message) async {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (ctx) => MyHomePage()));
-    }, onLaunch: (Map<String, dynamic> message) async {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (ctx) => MyHomePage()));
-    }, onResume: (Map<String, dynamic> message) async {
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (ctx) => MyHomePage()));
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (ctx) => AlertDialog(
+          title: message['notification']['title'],
+          actions: <Widget>[
+            Text(
+              'OK',
+              style: GoogleFonts.lato(),
+            )
+          ],
+        ),
+      );
     });
     _messaging.subscribeToTopic('newuser');
     super.initState();
