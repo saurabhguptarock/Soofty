@@ -21,9 +21,8 @@ exports.onMusicUpload = functions.storage.object().onFinalize(async object => {
     expires: "03-17-2025"
   });
   const url = results[0];
-  console.log(fileName);
 
-  if (fileName.split("/")[0] == "Music Files")
+  if (fileName.split("/")[0] == "Music Files") {
     admin
       .firestore()
       .collection("musicTiles")
@@ -36,4 +35,16 @@ exports.onMusicUpload = functions.storage.object().onFinalize(async object => {
       .then(id => {
         id.update({ uid: id.id });
       });
+  } else {
+    let docss = await admin
+      .firestore()
+      .collection("musicTiles")
+      .get();
+    for (let i = 0; i < docss.docs.length; i++) {
+      if (docss.docs[i].data()["img"] == "") {
+        docss.docs[i].ref.update({ img: url });
+        break;
+      }
+    }
+  }
 });
