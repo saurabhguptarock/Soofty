@@ -157,8 +157,15 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     });
-    _messaging.subscribeToTopic('newuser');
+    _messaging.subscribeToTopic('seeNewMusic');
     super.initState();
+  }
+
+  void saveDeviceToken(String uid) async {
+    String token = await _messaging.getToken();
+    if (token != null) {
+      await firebaseService.addUserToken(uid, token);
+    }
   }
 
   initialize() async {
@@ -219,6 +226,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     User user = Provider.of<User>(context);
+    saveDeviceToken(user.uid);
     return Scaffold(
       floatingActionButton: Stack(
         children: <Widget>[

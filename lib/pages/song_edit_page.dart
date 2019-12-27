@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_performance/firebase_performance.dart';
+import 'package:flutter/services.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
@@ -366,8 +367,7 @@ class _SongEditPageState extends State<SongEditPage> {
                       Future.delayed(Duration(seconds: 10), () {
                         if (isTakingTooLong) {
                           pr.dismiss();
-                          showToast(
-                              'Some Error Occured, Please Try Again');
+                          showToast('Some Error Occured, Please Try Again');
                           metric.stop();
                         }
                       });
@@ -384,10 +384,17 @@ class _SongEditPageState extends State<SongEditPage> {
                       File('$tempPath/Downloads/args.txt')
                           .openWrite()
                           .write(fileContent);
+                      if (!File('$tempPath/Downloads/icon.webp').existsSync()) {
+                        ByteData data =
+                            await rootBundle.load('assets/icons/banner.webp');
+                        List<int> bytes = data.buffer.asUint8List(
+                            data.offsetInBytes, data.lengthInBytes);
+                        await File('$tempPath/Downloads/icon.webp')
+                            .writeAsBytes(bytes);
+                      }
                       String txt = await File('$tempPath/Downloads/args.txt')
                           .readAsString();
                       print(txt);
-
                       _flutterFFmpeg
                           .getMediaInformation(
                               '$tempPath/Downloads/${widget.musicFiles.name}.m4a')
@@ -442,9 +449,24 @@ class _SongEditPageState extends State<SongEditPage> {
                           '0:v:0',
                           '-map',
                           '1:a:0',
+                          '$tempPath/Export/${user.uid}_${uniqueId}_1_5.mp4'
+                        ]);
+                        int ans3 = await _flutterFFmpeg.executeWithArguments([
+                          '-i',
+                          '$tempPath/Export/${user.uid}_${uniqueId}_1_5.mp4',
+                          '-i',
+                          '$tempPath/Downloads/icon.webp',
+                          '-filter_complex',
+                          "[0:v][1:v] overlay=25:25:enable='between(t,0,30)'",
+                          '-pix_fmt',
+                          'yuv420p',
+                          '-max_muxing_queue_size',
+                          '9999',
+                          '-c:a',
+                          'copy',
                           '$tempPath/Export/${user.uid}_${uniqueId}_2.mp4'
                         ]);
-                        if (ans1 == 0 && ans2 == 0) {
+                        if (ans1 == 0 && ans2 == 0 && ans3 == 0) {
                           await metric.stop();
                           showInterstitialAd();
                           stop();

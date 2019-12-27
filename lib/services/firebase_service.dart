@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -61,6 +63,19 @@ Future<QuerySnapshot> streamMusicTile(
         .limit(20)
         .getDocuments();
   }
+}
+
+Future<void> addUserToken(String uid, String token) async {
+  await _firestore
+      .collection('users')
+      .document(uid)
+      .collection('tokens')
+      .document(token)
+      .setData({
+    'token': token,
+    'createdAt': FieldValue.serverTimestamp(),
+    'platform': Platform.operatingSystem
+  });
 }
 
 void signOut() {

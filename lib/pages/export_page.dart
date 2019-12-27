@@ -46,11 +46,11 @@ class _ExportPageState extends State<ExportPage> {
         });
       });
     play();
-    initialize();
     var initializationSettings = InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
     flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
+    initialize();
     super.initState();
   }
 
