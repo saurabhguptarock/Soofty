@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:soofty/pages/home_page.dart';
 import 'package:soofty/pages/login_screen.dart';
 import 'package:soofty/shared/shared_code.dart';
-import 'model/model.dart';
+import 'package:soofty/model/model.dart';
 import 'package:soofty/services/firebase_service.dart' as firebaseService;
 
 void main() {

@@ -1,6 +1,6 @@
 name: soofty
 description: WhatsApp Video Status Maker.
-version: 9.0.4
+version: 10.1.0
 
 environment:
   sdk: ">=2.2.2 <3.0.0"

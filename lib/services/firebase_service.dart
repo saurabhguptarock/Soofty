@@ -70,12 +70,12 @@ Future<void> addUserToken(String uid, String token) async {
       .collection('users')
       .document(uid)
       .collection('tokens')
-      .document(token)
+      .document()
       .setData({
     'token': token,
     'createdAt': FieldValue.serverTimestamp(),
     'platform': Platform.operatingSystem
-  });
+  }, merge: true);
 }
 
 void signOut() {
