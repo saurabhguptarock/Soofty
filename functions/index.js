@@ -41,9 +41,11 @@ exports.onMusicUpload = functions.storage.object().onFinalize(async object => {
       .collection("musicTiles")
       .get();
     for (let i = 0; i < docss.docs.length; i++) {
-      if (docss.docs[i].data()["img"] == "") {
+      if (
+        docss.docs[i].data()["name"] == fileName.split("/")[1].split(".")[0]
+      ) {
         docss.docs[i].ref.update({ img: url });
-        console.log("Updated 1 Document.");
+        console.log(`Updated Document ${docss.docs[i].id}.`);
         break;
       }
     }
