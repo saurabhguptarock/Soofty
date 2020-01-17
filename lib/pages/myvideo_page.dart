@@ -21,7 +21,6 @@ class _MyVideoPageState extends State<MyVideoPage> {
   List<File> _files = [];
   List<String> _thumb = [];
   InterstitialAd _interstitialAd;
-  bool _canShowAds = true;
   static final MobileAdTargetingInfo mobileAdTargetingInfo =
       MobileAdTargetingInfo(
     keywords: ['camera', 'music', 'image', 'status', 'video', 'whatsapp'],
@@ -42,20 +41,7 @@ class _MyVideoPageState extends State<MyVideoPage> {
 
   InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-        adUnitId: interstitialAdId,
-        targetingInfo: mobileAdTargetingInfo,
-        listener: (MobileAdEvent event) {
-          if (event == MobileAdEvent.opened) {
-            setState(() {
-              _canShowAds = false;
-            });
-            Future.delayed(Duration(seconds: 30), () {
-              setState(() {
-                _canShowAds = true;
-              });
-            });
-          }
-        });
+        adUnitId: interstitialAdId, targetingInfo: mobileAdTargetingInfo);
   }
 
   void loadInterstitialAd() {
@@ -63,10 +49,8 @@ class _MyVideoPageState extends State<MyVideoPage> {
   }
 
   void showInterstitialAd() {
-    if (_canShowAds) {
-      _interstitialAd..show();
-      loadInterstitialAd();
-    }
+    _interstitialAd..show();
+    loadInterstitialAd();
   }
 
   @override

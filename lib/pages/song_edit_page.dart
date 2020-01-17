@@ -47,7 +47,6 @@ class _SongEditPageState extends State<SongEditPage> {
   int _noOfImages = 1;
   List<File> _images = List(10);
   InterstitialAd _interstitialAd;
-  bool _canShowAds = true;
   final FlutterFFmpeg _flutterFFmpeg = FlutterFFmpeg();
   ProgressDialog pr;
 
@@ -103,20 +102,7 @@ class _SongEditPageState extends State<SongEditPage> {
 
   InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-        adUnitId: interstitialAdId,
-        targetingInfo: mobileAdTargetingInfo,
-        listener: (MobileAdEvent event) {
-          if (event == MobileAdEvent.opened) {
-            setState(() {
-              _canShowAds = false;
-            });
-            Future.delayed(Duration(seconds: 30), () {
-              setState(() {
-                _canShowAds = true;
-              });
-            });
-          }
-        });
+        adUnitId: interstitialAdId, targetingInfo: mobileAdTargetingInfo);
   }
 
   void loadInterstitialAd() {
@@ -124,10 +110,8 @@ class _SongEditPageState extends State<SongEditPage> {
   }
 
   void showInterstitialAd() {
-    if (_canShowAds) {
-      _interstitialAd..show();
-      loadInterstitialAd();
-    }
+    _interstitialAd..show();
+    loadInterstitialAd();
   }
 
   @override

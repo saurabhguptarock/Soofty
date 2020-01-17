@@ -1,6 +1,6 @@
 name: soofty
 description: WhatsApp Video Status Maker.
-version: 10.1.0
+version: 12.4.7
 
 environment:
   sdk: ">=2.2.2 <3.0.0"
@@ -42,6 +42,7 @@ dependencies:
   firebase_messaging: ^6.0.3
   flutter_local_notifications: ^0.8.4+3
   thumbnails: ^1.0.1
+  image_gallery_saver: ^1.2.2
   # !-----------------! #
   # intro_slider: ^2.2.8
   # koukicons: ^2.0.2

@@ -41,7 +41,6 @@ class _HomePageState extends State<HomePage> {
   final Trace myTrace = FirebasePerformance.instance.newTrace("get_music_data");
   BannerAd _bannerAd;
   InterstitialAd _interstitialAd;
-  bool _canShowAds = true;
   List<MusicFiles> products = [];
   bool isLoading = false;
   bool hasMore = true;
@@ -62,20 +61,7 @@ class _HomePageState extends State<HomePage> {
 
   InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-        adUnitId: interstitialAdId,
-        targetingInfo: mobileAdTargetingInfo,
-        listener: (MobileAdEvent event) {
-          if (event == MobileAdEvent.opened) {
-            setState(() {
-              _canShowAds = false;
-            });
-            Future.delayed(Duration(seconds: 30), () {
-              setState(() {
-                _canShowAds = true;
-              });
-            });
-          }
-        });
+        adUnitId: interstitialAdId, targetingInfo: mobileAdTargetingInfo);
   }
 
   void loadInterstitialAd() {
@@ -83,10 +69,8 @@ class _HomePageState extends State<HomePage> {
   }
 
   void showInterstitialAd() {
-    if (_canShowAds) {
-      _interstitialAd..show();
-      loadInterstitialAd();
-    }
+    _interstitialAd..show();
+    loadInterstitialAd();
   }
 
   // TODO: add things for rewarded add

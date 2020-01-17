@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:provider/provider.dart';
 import 'package:soofty/pages/myvideo_page.dart';
+import 'package:soofty/shared/shared_code.dart';
 import 'package:video_player/video_player.dart';
 import 'package:soofty/model/model.dart';
 import 'package:soofty/pages/home_page.dart';
@@ -80,6 +82,8 @@ class _ExportPageState extends State<ExportPage> {
     await flutterLocalNotificationsPlugin.show(0, 'Export Complete',
         '${widget.musicFiles.name}', platformChannelSpecifics,
         payload: '${widget.musicFiles.name}');
+    await ImageGallerySaver.saveFile('${widget.fileName}');
+    showToast('File Saved To Gallery');
   }
 
   void play() {
