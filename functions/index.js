@@ -3,13 +3,6 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const serviceAccount = require("./services-account.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://soofty-b9cb5.firebaseio.com",
-  storageBucket: "soofty-b9cb5.appspot.com",
-  projectId: "soofty-b9cb5"
-});
-
 const defaultStorage = admin.storage();
 const message = admin.messaging();
 exports.onMusicUpload = functions.storage.object().onFinalize(async object => {
